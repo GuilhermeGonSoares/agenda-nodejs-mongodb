@@ -19,7 +19,7 @@ const route = require('./routes');
 const path = require('path');
 const helmet = require('helmet');
 const csrf = require('csurf');
-const {checkError, csrfMiddleware} = require('./src/middlewares/middleware');
+const {checkError, csrfMiddleware, global} = require('./src/middlewares/middleware');
 
 
 app.use(helmet());
@@ -48,6 +48,7 @@ app.use(csrf());
 //Nossos próprios middleware
 app.use(checkError);
 app.use(csrfMiddleware);
+app.use(global);
 
 app.use(route);
 
