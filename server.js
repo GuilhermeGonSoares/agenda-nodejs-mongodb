@@ -4,8 +4,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 
-mongoose.set('strictQuery', true);
-mongoose.connect(process.env.CONNECTIONSTRING)
+mongoose.connect(process.env.CONNECTIONSTRING, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
         console.log('MongoDb conectado!')
         app.emit('pronto');
@@ -18,6 +17,12 @@ const flash = require('connect-flash');
 
 const route = require('./routes');
 const path = require('path');
+const helmet = require('helmet');
+const csrf = require('csurf');
+const {checkError, csrfMiddleware} = require('./src/middlewares/middleware');
+
+
+app.use(helmet());
 
 app.use(express.urlencoded({ extended:true }));
 app.use(express.json());
@@ -39,12 +44,11 @@ app.use(flash());
 app.set('views', path.resolve(__dirname, 'src', 'views'));
 app.set('view engine', 'ejs');
 
-//Meu middleware
-//Como não colocamos o endpoint(rota) esse middleware irá funcionar para todas as rotas.
-app.use((req, res, next) => {
-    res.locals.minhaVariavelLocal = 'TESTANDO A VARIAVEL QUE VAI PARA TODOS OS ENDPOINTS';
-    next();
-})
+app.use(csrf());
+//Nossos próprios middleware
+app.use(checkError);
+app.use(csrfMiddleware);
+
 app.use(route);
 
 app.on('pronto', () => {
