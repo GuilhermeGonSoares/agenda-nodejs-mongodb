@@ -24,3 +24,30 @@ exports.register = async (req, res) => {
         return res.render('404');
     } 
 };
+
+exports.login = async (req, res) => {
+    try {
+        const login = new Login(req.body);
+        await login.logar();
+
+        if(!login.isValid()) {
+            req.flash('errors', login.errors);
+            req.session.save(() => res.redirect('/login'));
+            return; 
+        }
+
+        req.flash('success', 'Login realizado com sucesso!');
+        req.session.user = login.user;
+        req.session.save(() => res.redirect('/'));
+        return;
+
+    } catch (e) {
+        console.log(e);
+        return res.render('404');
+    }
+};
+
+exports.logout = (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
+}

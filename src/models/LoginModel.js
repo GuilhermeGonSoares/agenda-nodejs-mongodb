@@ -16,27 +16,41 @@ class Login {
         this.user = null;
     }
 
+    async logar() {
+        await this.validate();
+        if (this.errors.length > 0) return;
+        
+        this.user = await LoginModel.findOne({email:this.body.email});
+        if (!this.user) {
+            this.errors.push('E-mail não cadastrado!');
+            return;
+        }
+        if (!bcryptjs.compareSync(this.body.password, this.user.password)) {
+            this.errors.push('Senha inválida!');
+            return;
+        }
+
+    }
+
     async register() {
         await this.validate();
+        await this.userExists();
         if(this.errors.length > 0) return;
 
-        try{
-            const salt = bcryptjs.genSaltSync();
-            this.body.password = bcryptjs.hashSync(this.body.password, salt);
-            this.user = await LoginModel.create(this.body);
-        } catch (e) {
-            console.log(e);
-        }
+        const salt = bcryptjs.genSaltSync();
+        this.body.password = bcryptjs.hashSync(this.body.password, salt);
+        this.user = await LoginModel.create(this.body);
+    }
+
+    async userExists() {
+        //Verificar se o e-mail já foi cadastrado!
+        const user = await LoginModel.findOne({email:this.body.email});
+        if (user) this.errors.push('E-mail já cadastrado!');
     }
 
     async validate() {
         this.cleanUp();
         //Validação!
-        
-        //Verificar se o e-mail já foi cadastrado!
-        const user = await LoginModel.findOne({email:this.body.email});
-        if (user) this.errors.push('E-mail já cadastrado!');
-
         //O e-mail precisa ser válido
         if (!validator.isEmail(this.body.email)) this.errors.push('E-mail inválido!');
         //A senha precisa ter entre 3 e 50 
