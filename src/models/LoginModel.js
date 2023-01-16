@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcryptjs = require('bcryptjs');
 
 const LoginSchema = new mongoose.Schema({
     email: { type: String, required: true},
@@ -16,19 +17,26 @@ class Login {
     }
 
     async register() {
-        this.validate();
+        await this.validate();
         if(this.errors.length > 0) return;
-        
+
         try{
+            const salt = bcryptjs.genSaltSync();
+            this.body.password = bcryptjs.hashSync(this.body.password, salt);
             this.user = await LoginModel.create(this.body);
         } catch (e) {
             console.log(e);
         }
     }
 
-    validate() {
+    async validate() {
         this.cleanUp();
         //Validação!
+        
+        //Verificar se o e-mail já foi cadastrado!
+        const user = await LoginModel.findOne({email:this.body.email});
+        if (user) this.errors.push('E-mail já cadastrado!');
+
         //O e-mail precisa ser válido
         if (!validator.isEmail(this.body.email)) this.errors.push('E-mail inválido!');
         //A senha precisa ter entre 3 e 50 
