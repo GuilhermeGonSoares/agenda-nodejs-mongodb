@@ -33,7 +33,7 @@ class Login {
     }
 
     async register() {
-        await this.validate();
+        this.validate();
         await this.userExists();
         if(this.errors.length > 0) return;
 
@@ -48,7 +48,7 @@ class Login {
         if (user) this.errors.push('E-mail já cadastrado!');
     }
 
-    async validate() {
+    validate() {
         this.cleanUp();
         //Validação!
         //O e-mail precisa ser válido
