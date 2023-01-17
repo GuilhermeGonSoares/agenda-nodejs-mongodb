@@ -56,6 +56,24 @@ class Contato {
         if(typeof id !== 'string') return;
         return await ContatoModel.findById(id);
     }
+
+    static async buscarTodosContatos() {
+        return await ContatoModel.find()
+            .sort({ criandoEm: -1});
+    }
+
+    static async delete(id) {
+        if(typeof id !== 'string') return;
+        return await ContatoModel.findOneAndDelete({_id: id});
+    }
+
+    async edit(id) {
+        if(typeof id !== 'string') return;
+        this.validate();
+        if(this.errors.length > 0) return;
+        
+        this.contato = await ContatoModel.findByIdAndUpdate(id, this.body, { new: true });
+    }
 }
 
 module.exports = Contato;

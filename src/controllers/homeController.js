@@ -1,7 +1,10 @@
+const Contato = require('../models/ContatoModel');
 
-exports.index = (req, res) => {
-    console.log(req.session.user);
-    res.render('index');
+exports.index = async (req, res) => {
+    const contatos = await Contato.buscarTodosContatos();
+    res.render('index', {
+        contatos
+    });
 };
 
 

@@ -41,3 +41,45 @@ exports.register = async (req, res) => {
         res.render('404');
     }
 };
+
+exports.edit = async (req, res) => {
+    try {
+        const id = req.params.id;
+        if(!id) return res.render('404');
+    
+        const contato = new Contato(req.body);
+        await contato.edit(id);
+    
+        if(contato.errors.length > 0) {
+            req.flash('errors', contato.errors);
+            req.session.save(() => res.redirect(`/contato/index/${id}`));
+            return;
+        }
+    
+        req.flash('success', 'Contato editado com sucesso!');
+        req.session.save(() => res.redirect(`/contato/index/${contato.contato._id}`));
+        return;
+    } catch (e) {
+        console.log(e);
+        return res.render('404');
+    }
+};
+
+exports.delete = async (req, res) => {
+    try{
+        const id = req.params.id;
+        if(!id) return res.render('404');
+
+        const contato = await Contato.delete(id);
+        console.log(contato);
+        if(!contato) return res.render('404');
+
+        req.flash('success', 'Contato apagado com sucesso.');
+        req.session.save(() => res.redirect('/'));
+        return;
+
+    } catch (e) {
+        console.log(e);
+        res.render('404');
+    }
+}
